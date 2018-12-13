@@ -18,7 +18,7 @@ __all__ = ['dtw_distance', 'KnnDTW']
 
 def slow_dtw_distance(series1, series2):
     """
-        Returns the DTW similarity distance between two 2-D
+        Returns the DTW similarity distance between two 1-D
         timeseries numpy arrays.
 
         Arguments:

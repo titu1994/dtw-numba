@@ -32,11 +32,11 @@ def dtw_distance(dataset1, dataset2):
 @jit(nopython=True, cache=True)
 def _dtw_distance(series1, series2):
     """
-    Returns the DTW similarity distance between two 2-D
+    Returns the DTW similarity distance between two 1-D
     timeseries numpy arrays.
 
     Args:
-        series1, series2 : array of shape [n_samples, n_timepoints]
+        series1, series2 : array of shape [n_timepoints]
             Two arrays containing n_samples of timeseries data
             whose DTW distance between each sample of A and B
             will be compared.
