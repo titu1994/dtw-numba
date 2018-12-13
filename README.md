@@ -49,8 +49,8 @@ Here, we compare the time taken to compute the DTW distance between the first tr
 Output : 
 ```
 Non Numba Optimized time :  0.12019050598144532
-Sample optimized time in ms :  8.00013542175293e-05
-Dataset optimized time in ms :  0.0003000330924987793
+Sample optimized time :  8.00013542175293e-05
+Dataset optimized time :  0.0003000330924987793
 
 Non Optimized dist :  1.1218082709896633
 Numba Optimized dist :  1.1218082709896633
@@ -72,8 +72,8 @@ Here, we compute the time taken to compute the DTW distance matrix between the e
 Output : 
 ```
 Non Numba Optimized time :  1974.090342625578
-Sample optimized time in ms :  13.303221225738525
-Dataset optimized time in ms :  3.0960452556610107
+Sample optimized time :  13.303221225738525
+Dataset optimized time :  3.0960452556610107
 
 Non Optimized dist mean :  0.9556927603445304
 Sample Optimized mean dist :  0.9556927603445304
