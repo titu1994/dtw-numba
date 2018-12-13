@@ -38,7 +38,7 @@ for i in range(X0.shape[0]):
 
 sample_t2 = time.time()
 
-print("Sample optimized time in ms : ", (sample_t2 - sample_t1) / float(COUNT))
+print("Sample optimized time : ", (sample_t2 - sample_t1) / float(COUNT))
 
 dataset_t1 = time.time()
 
@@ -46,7 +46,7 @@ dataset_distance = numba_dataset_distance(X0, X1)
 
 dataset_t2 = time.time()
 
-print('Dataset optimized time in ms : ', (dataset_t2 - dataset_t1) / float(COUNT))
+print('Dataset optimized time : ', (dataset_t2 - dataset_t1) / float(COUNT))
 print()
 
 print('Non Optimized dist mean : ', slow_distance.mean())

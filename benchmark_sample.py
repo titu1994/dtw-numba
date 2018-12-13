@@ -33,7 +33,7 @@ for i in range(COUNT):
 
 sample_t2 = time.time()
 
-print("Sample optimized time in ms : ", (sample_t2 - sample_t1) / float(COUNT))
+print("Sample optimized time : ", (sample_t2 - sample_t1) / float(COUNT))
 
 dataset_t1 = time.time()
 for i in range(COUNT):
@@ -41,7 +41,7 @@ for i in range(COUNT):
 
 dataset_t2 = time.time()
 
-print('Dataset optimized time in ms : ', (dataset_t2 - dataset_t1) / float(COUNT))
+print('Dataset optimized time : ', (dataset_t2 - dataset_t1) / float(COUNT))
 print()
 
 print('Non Optimized dist : ', slow_distance)
