@@ -71,7 +71,7 @@ Here, we compute the time taken to compute the DTW distance matrix between the e
 
 Output : 
 ```
-Non Numba Optimized time :  1974.090342625578
+Non Numba Optimized time :  18364.090342625578
 Sample optimized time :  13.303221225738525
 Dataset optimized time :  3.0960452556610107
 
@@ -88,7 +88,7 @@ MSE (non optimized - dataset optimized):  0.0
 | Time in seconds | Non Optimized | Sample Optimized | Dataset Optimized |
 |-----------------|:-------------:|------------------|-------------------|
 | Single Sample   | 0.12019       | 8.01e-05         | 3.00e-4           |
-| Full Dataset    | > 30 mins     | 13.3015          | 3.096             |
+| Full Dataset    | > 5 hours     | 13.3015          | 3.096             |
 
 Key observations are : 
 
