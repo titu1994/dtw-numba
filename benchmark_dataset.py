@@ -54,7 +54,7 @@ print('Sample Optimized mean dist : ', sample_distance.mean())
 print('Dataset Optimized mean dist : ', dataset_distance.mean())
 print()
 
-print("MSE (non optimized - sample optimized): ", np.square(slow_distance - sample_distance))
-print("MSE (non optimized - dataset optimized): ", np.square(slow_distance - dataset_distance))
+print("MSE (non optimized - sample optimized): ", np.mean(np.square(slow_distance - sample_distance)))
+print("MSE (non optimized - dataset optimized): ", np.mean(np.square(slow_distance - dataset_distance)))
 
 
