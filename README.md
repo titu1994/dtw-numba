@@ -86,8 +86,8 @@ MSE (non optimized - dataset optimized):  0.0
 ## Summary
 
 | Time in seconds | Non Optimized | Sample Optimized | Dataset Optimized |
-|-----------------|:-------------:|------------------|-------------------|
-| Single Sample   | 0.12019       | 8.01e-05         | 3.00e-04           |
+|-----------------|:-------------:|:----------------:|:-----------------:|
+| Single Sample   | 0.12019       | 8.01e-05         | 3.00e-04          |
 | Full Dataset    | > 2 hours     | 13.3015          | 3.096             |
 
 Key observations are : 
