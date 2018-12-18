@@ -5,6 +5,7 @@ from utils.data_loader import load_dataset
 from dtw import slow_dtw_distance
 from dtw import dtw_distance as numba_sample_distance
 from odtw import dtw_distance as numba_dataset_distance
+from ucrdtw import dtw_distance as ucr_dataset_distance
 
 X_train, y_train, X_test, y_test = load_dataset('adiac', normalize_timeseries=True)
 print()
@@ -17,17 +18,18 @@ COUNT = 1
 # Compile first
 _ = numba_sample_distance(X0[0], X1[0])
 _ = numba_dataset_distance(X0[0:1], X1[0:1])
+_ = ucr_dataset_distance(X0[0:1], X1[0:1], r=-1, normalize=False)
 
-slow_t1 = time.time()
-
-slow_distance = np.empty((X0.shape[0], X1.shape[0]))
-for i in range(X0.shape[0]):
-    for j in range(X1.shape[0]):
-        slow_distance[i, j] = slow_dtw_distance(X0[i], X1[j])
-
-slow_t2 = time.time()
-
-print("Non Numba optimized time : ", (slow_t2 - slow_t1) / float(COUNT))
+# slow_t1 = time.time()
+#
+# slow_distance = np.empty((X0.shape[0], X1.shape[0]))
+# for i in range(X0.shape[0]):
+#     for j in range(X1.shape[0]):
+#         slow_distance[i, j] = slow_dtw_distance(X0[i], X1[j])
+#
+# slow_t2 = time.time()
+#
+# print("Non Numba optimized time : ", (slow_t2 - slow_t1) / float(COUNT))
 
 sample_t1 = time.time()
 
@@ -42,6 +44,14 @@ print("Sample optimized time : ", (sample_t2 - sample_t1) / float(COUNT))
 
 dataset_t1 = time.time()
 
+ucr_distance = ucr_dataset_distance(X0, X1, r=-1, normalize=False)
+
+dataset_t2 = time.time()
+
+print('UCR optimized time : ', (dataset_t2 - dataset_t1) / float(COUNT))
+
+dataset_t1 = time.time()
+
 dataset_distance = numba_dataset_distance(X0, X1)
 
 dataset_t2 = time.time()
@@ -49,12 +59,12 @@ dataset_t2 = time.time()
 print('Dataset optimized time : ', (dataset_t2 - dataset_t1) / float(COUNT))
 print()
 
-print('Non Optimized dist mean : ', slow_distance.mean())
+# print('Non Optimized dist mean : ', slow_distance.mean())
 print('Sample Optimized mean dist : ', sample_distance.mean())
 print('Dataset Optimized mean dist : ', dataset_distance.mean())
+print('UCR Optimized mean dist : ', ucr_distance.mean())
 print()
 
-print("MSE (non optimized - sample optimized): ", np.mean(np.square(slow_distance - sample_distance)))
-print("MSE (non optimized - dataset optimized): ", np.mean(np.square(slow_distance - dataset_distance)))
-
-
+#print("MSE (non optimized - sample optimized): ", np.mean(np.square(slow_distance - sample_distance)))
+print("MSE (sample optimized - dataset optimized): ", np.mean(np.square(sample_distance - dataset_distance)))
+print("MSE (dataset optimized - ucr optimized): ", np.mean(np.square(dataset_distance - ucr_distance)))
