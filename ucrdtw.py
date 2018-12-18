@@ -11,6 +11,7 @@ from sklearn.metrics import accuracy_score
 __all__ = ['dtw_distance', 'KnnDTW']
 
 INF = 1e9
+EPSILON = 1e-8
 
 
 @jit(nopython=True, parallel=True, nogil=True)
@@ -44,7 +45,7 @@ def dtw_distance(dataset1, dataset2, r, normalize):
             q_temp.append(idx)
 
         # sort using reverse quicksort
-        quicksort(q_temp, 0, len(q_temp) - 1)
+        quicksort(q_temp, 0, l2 - 1)
 
         for i in prange(n1):
             dist[i][j] = _dtw_distance(dataset1[i], dataset2[j], q_temp, r, normalize)
@@ -138,7 +139,7 @@ class Index(object):
 class Deque(object):
 
     def __init__(self, capacity):
-        self.dq = np.zeros(capacity, dtype=np.int64)
+        self.dq = np.empty(capacity, dtype=np.int64)
         self.size = 0
         self.capacity = capacity
         self.f = 0
@@ -257,12 +258,16 @@ The pruning power of LB_Kim is non-trivial, especially when the query is not lon
 
 @jit(nopython=True)
 def lb_kim_hierarchy(t, q, j, len, mean, std, best_so_far):
+
     x0 = (t[j] - mean) / std
     y0 = (t[(len - 1 + j)] - mean) / std
 
     lb = dist(x0, q[0]) + dist(y0, q[len - 1])
 
     if (lb >= best_so_far):
+        return lb
+
+    if len < 2:
         return lb
 
     # 2 points at front
@@ -281,6 +286,9 @@ def lb_kim_hierarchy(t, q, j, len, mean, std, best_so_far):
     lb += d
 
     if (lb >= best_so_far):
+        return lb
+
+    if len < 3:
         return lb
 
     # 3 points at front
@@ -325,14 +333,21 @@ def lb_keogh_cumulative(order, t, uo, lo, cb, j, len, mean, std, best_so_far):
     for i in range(len):
         if lb < best_so_far:
             x = (t[(order[i] + j)] - mean) / std
-            d = 0
+            d = 0.0
+
             if (x > uo[i]):
-                d = dist(x, uo[i])
+                v = x - uo[i]
+                d = v * v
+
             elif (x < lo[i]):
-                d = dist(x, lo[i])
+                v = x - lo[i]
+                d = v * v
 
             lb += d
             cb[order[i]] = d
+
+        else:
+            break
 
     return lb
 
@@ -470,8 +485,9 @@ def _dtw_distance(series1, series2, q_temp, r, normalize):
         r = int(r * l2)
     elif r < 0:
         r = l2
-    else:
-        r = int(r)
+    
+    # r must be a minimum of 1
+    r = max(1, int(r))
 
     EPOCH = maximum(l1, l2)  # 100000
 
@@ -517,7 +533,7 @@ def _dtw_distance(series1, series2, q_temp, r, normalize):
         # z-normalize the query, keep in same array, q
         mean = ex / float(l2)
         std = ex2 / float(l2)
-        std = np.sqrt(std - mean * mean)
+        std = np.sqrt(std - mean * mean) + EPSILON
 
         for i in range(l2):
             q[i] = (q[i] - mean) / std
@@ -590,7 +606,7 @@ def _dtw_distance(series1, series2, q_temp, r, normalize):
                 if i >= (l2 - 1):
                     mean = ex / l2
                     std = ex2 / l2
-                    std = np.sqrt(std - mean * mean)
+                    std = np.sqrt(std - mean * mean) + EPSILON
 
                     # compute the start location of the data in the current circular array, t
                     j = (i + 1) % l2

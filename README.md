@@ -21,7 +21,7 @@ The three variants available are in `dtw.py`, `odtw.py` and `ucrdtw.py`.
 
 `ucrdtw.py` is a highly efficient alternative to `odtw.py`, which provides the ability to select warping window and online z-normalization of the dataset. Currently, it is not as performant as the optimized C version.
 
- - **NOTE**: Due to the limitations of Numba, the `ucrdtw` implementation is slightly slower than `odtw` for certain datasets. However, for warping window less than 100%, it often surpasses `odtw`. To keep scores from evaluations equivalent, all evaluated results will be done with an infinite warping window (the entire length of the query series).
+ - **NOTE**: Due to an inefficient implementation, the `ucrdtw` implementation is slightly slower than `odtw` for certain datasets. However, for warping window less than 100%, it often surpasses `odtw`. To keep scores from evaluations equivalent, all evaluated results will be done with an infinite warping window (the entire length of the query series).
 
 ## Speed optimizations
 -----
