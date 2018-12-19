@@ -15,13 +15,13 @@ The three variants available are in `dtw.py`, `odtw.py` and `ucrdtw.py`.
 
 - `dtw.py`: Single threaded variant, support for visualizing the progress bar.
 - `odtw.py`: Multi threaded variant, no support for visualization. In practice, much more effiecient.
-- `ucrdtw.py`: Multi threaded variant, no support for visualization. It is based upon the optimized C implementation available at https://github.com/klon/ucrdtw.
+- `ucrdtw.py`: **Experimental (Do not use)**. Multi threaded variant, no support for visualization. It is based upon the optimized C implementation available at https://github.com/klon/ucrdtw.
 
 `odtw.py` is further optimized to run on entire datasets in parallel, and therefore is preferred for any task involving classification.
 
-`ucrdtw.py` is a highly efficient alternative to `odtw.py`, which provides the ability to select warping window and online z-normalization of the dataset. Currently, it is not as performant as the optimized C version.
+`ucrdtw.py` is a highly efficient alternative to `odtw.py`, which provides the ability to select warping window and online z-normalization of the dataset. Currently, it is not as performant as the optimized C version, and the original codebase should be used instead.
 
- - **NOTE**: Due to an inefficient implementation, the `ucrdtw` implementation is slightly slower than `odtw` for certain datasets. However, for warping window less than 100%, it often surpasses `odtw`. To keep scores from evaluations equivalent, all evaluated results will be done with an infinite warping window (the entire length of the query series).
+ - **NOTE**: Due to an inefficient implementation, the `ucrdtw` implementation is much slower than `odtw` for certain datasets. However, for warping window less than 100%, it often surpasses `odtw`. To keep scores from evaluations equivalent, all evaluated results will be done with an infinite warping window (the entire length of the query series).
 
 ## Speed optimizations
 -----
@@ -41,7 +41,7 @@ Optimizations available to `ucrdtw.py` :
 
 - Computation of lower bounds to exit DTW computation early
 - Compiled data structures and operations on Deque for fast computation of lower bounds
-- Compiled reverse sorting via Quicksort
+- Compiled reverse sorting via Quicksort, falling back to reverse insertion sort for small subsets.
 - Compiled ops for minimum, maximum, absolute value and square distance
 - Cached allocations compared to the C version
 - Choice for online z-normalization

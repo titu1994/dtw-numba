@@ -4,14 +4,15 @@ available at https://github.com/klon/ucrdtw/blob/master/src/ucrdtw.c
 """
 
 import numpy as np
-from numba import jit, prange, jitclass, float64, int64
+from numba import jit, prange, jitclass, float64, int32, int64
 from scipy.stats import mode
 from sklearn.metrics import accuracy_score
 
 __all__ = ['dtw_distance', 'KnnDTW']
 
-INF = 1e9
+INF = 1e20
 EPSILON = 1e-8
+QSORT_THRESHOLD = 4
 
 
 @jit(nopython=True, parallel=True, nogil=True)
@@ -84,42 +85,92 @@ def absolute_val(x):
 
 
 @jit(nopython=True)
-def _reverse_partition(arr, low, high):
+def _quicksort_impl(arr, low, high):
     pivot = low + (high - low) // 2
-
-    temp = arr[high]
-    arr[high] = arr[pivot]
-    arr[pivot] = temp
-
-    pivot_val = absolute_val(arr[high].value)
+    pivot_val = absolute_val(arr[pivot].value)
 
     i = low
-    for j in range(low, high):
-        if (absolute_val(arr[j].value) > pivot_val):
-            temp1 = arr[j]
-            arr[j] = arr[i]
-            arr[i] = temp1
+    j = high
+    while i < j:
+        while (absolute_val(arr[i].value) > pivot_val):
             i += 1
 
-    # swapping pivot with its correct position
-    temp2 = arr[high]
-    arr[high] = arr[i]
-    arr[i] = temp2
+        while (absolute_val(arr[j].value) < pivot_val):
+            j -= 1
 
-    return i
+        if j >= i:
+            arr[i], arr[j] = arr[j], arr[i]
+            i += 1
+            j -= 1
+
+    if low < j:
+        _quicksort_impl(arr, low, j)
+
+    if i < high:
+        _quicksort_impl(arr, i, high)
 
 
 @jit(nopython=True)
 def quicksort(arr, low, high):
     if low < high:
-        # pi is partitioning index, arr[p] is now
-        # at right place
-        pi = _reverse_partition(arr, low, high)
+        if int(high - low) > QSORT_THRESHOLD:
+            # Perform Quicksort
+            _quicksort_impl(arr, low, high)
 
-        # Separately sort elements before
-        # partition and after partition
-        quicksort(arr, low, pi - 1)
-        quicksort(arr, pi + 1, high)
+        else:
+            # Perform Insertion Sort based on the C++ implementation
+            # https://code.woboq.org/userspace/glibc/stdlib/qsort.c.html
+
+            # Find smallest element in first threshold and place it at the
+            # array's beginning.  This is the smallest array element,
+            # and the operation speeds up insertion sort's inner loop.
+            temp_largest_idx = low
+            end_threshold = min(high - low, QSORT_THRESHOLD)
+
+            for idx in range(1, end_threshold):
+                if absolute_val(arr[temp_largest_idx].value) < absolute_val(arr[low + idx].value):
+                    temp_largest_idx = low + idx
+
+            # swap the smallest found with current index position
+            if temp_largest_idx != low:
+                temp = arr[low]
+                arr[low] = arr[temp_largest_idx]
+                arr[temp_largest_idx] = temp
+
+            # Insertion sort, running from left-hand-side up to right-hand-side.
+            run_idx = low + 1
+            while (run_idx + 1 <= high):
+                temp_idx = run_idx
+                run_idx += 1
+
+                while (absolute_val(arr[run_idx].value) > absolute_val(arr[temp_idx].value)):
+                    temp_idx -= 1
+
+                temp_idx += 1
+                if (temp_idx != run_idx):
+                    trav = run_idx
+
+                    while (trav >= run_idx):
+                        c = arr[trav]
+                        hi = lo = trav
+
+                        while ((lo - 1) >= temp_idx):
+                            lo -= 1
+                            arr[hi] = arr[lo]
+                            hi = lo
+
+                        arr[hi] = c
+
+                        trav -= 1
+
+
+@jitclass([('lo', int32),
+           ('hi', int32)])
+class StackNode(object):
+
+    def __init__(self, lo, hi):
+        self.lo = lo
+        self.hi = hi
 
 
 @jitclass([('value', float64),
@@ -129,6 +180,9 @@ class Index(object):
     def __init__(self, value, index):
         self.value = value
         self.index = index
+
+    def __lt__(self, other):
+        return absolute_val(other.value) < absolute_val(self.value)
 
 
 @jitclass([('dq', int64[:]),
