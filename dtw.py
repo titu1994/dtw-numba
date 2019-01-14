@@ -296,8 +296,13 @@ class KnnDTW(object):
 
         # Concatenate the classwise distance matrices and transpose
         class_dm = np.concatenate(class_dm, axis=0)  # [C, N_test]
-        probabilities = class_dm.transpose()  # [N_test, C]
+        class_dm = class_dm.transpose()  # [N_test, C]
 
+        # Compute softmax probabilities
+        class_dm_exp = np.exp(class_dm - class_dm.max())
+        class_dm = class_dm_exp / np.sum(class_dm_exp, axis=-1, keepdims=True)
+
+        probabilities = class_dm
         knn_labels = np.argmax(probabilities, axis=-1)
 
         return probabilities, knn_labels
